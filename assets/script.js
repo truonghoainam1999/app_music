@@ -67,21 +67,30 @@ const app = {
     isPlaying: false,
     checkRepeat: false,
     checkRandom: false,
-    playMusic: function(audio,play,img) {
+    playMusic: function(audio,play,cdthumbAnimate) {
         this.isPlaying = true;
         audio.play()
         play.classList.replace('fa-play','fa-pause')
-        img.classList.add('anime')
+        cdthumbAnimate.play()
     },
-    pauseMusic: function(audio,play,img) {
+    pauseMusic: function(audio,play,cdthumbAnimate) {
         this.isPlaying = false;
         audio.pause()
         play.classList.replace('fa-pause','fa-play')
-        img.classList.remove('anime')
+        cdthumbAnimate.pause()
     },
     activeSong: function (item,index) {
         $('.item_song.active').classList.remove('active')
             item[index].classList.add('active')
+    },
+    scrollToActiveSong: function() {
+        setTimeout(function () {
+            $('.item_song.active').scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            })
+        },300)
+
     },
     start: function() {
         this.render()
@@ -101,7 +110,6 @@ const app = {
         let startTime = $('.crr_time')
         let totalDuration = $('.progress_duration')
         let progress = $('.progress_div')
-    
         let indexSong = 0
         itemSongs[indexSong].classList.add('active')
 
@@ -109,14 +117,21 @@ const app = {
             const itemSong = e.target.closest('.item_song')
             const dataIndex = itemSong.getAttribute('data-index')
             loadSong(app.listMusic[dataIndex])
-            app.playMusic(audio,play,crrImg)
+            app.playMusic(audio,play,cdthumbAnimate)
             indexSong = Number(dataIndex)
             app.activeSong(itemSongs,indexSong)
         }
-
+        
+        const cdthumbAnimate = crrImg.animate([
+            {transform: 'rotate(360deg)'}
+        ],{
+            duration : 10000 ,
+            iterations : Infinity,
+        })
+        cdthumbAnimate.pause()
 
         playBtn.onclick = function() {
-            app.isPlaying ? app.pauseMusic(audio,play,crrImg) : app.playMusic(audio,play,crrImg)
+            app.isPlaying ? app.pauseMusic(audio,play,cdthumbAnimate) : app.playMusic(audio,play,cdthumbAnimate)
         }
         const loadSong = function(song) {
             title.textContent = song.name,
@@ -130,9 +145,9 @@ const app = {
                 indexSong = (indexSong + 1) % app.listMusic.length
             }
             loadSong(app.listMusic[indexSong])
-            app.playMusic(audio,play,crrImg)
+            app.playMusic(audio,play,cdthumbAnimate)
             app.activeSong(itemSongs,indexSong)
-
+            app.scrollToActiveSong()
         }
         const prevSong = function() {
             if(app.checkRandom) {
@@ -141,8 +156,10 @@ const app = {
                 indexSong = (indexSong - 1 + app.listMusic.length) % app.listMusic.length
             }
             loadSong(app.listMusic[indexSong])
-            app.playMusic(audio,play,crrImg)
+            app.playMusic(audio,play,cdthumbAnimate)
             app.activeSong(itemSongs,indexSong)
+            app.scrollToActiveSong()
+
         }
         randomBtn.onclick = function() {
             if(app.checkRandom) {
